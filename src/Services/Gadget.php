@@ -152,4 +152,34 @@ class Gadget implements GadgetContract
         return in_array($this->lowercase($param, $locale), $array);
     }
 
+    /**
+     * * Converts dotted string $item to an associative array or appends to the provided $array
+     *
+     * $array = dotToArray('tags.name');
+     * $array = dotToArray('tags.color', $array);
+     * $array = dotToArray('tags.color', $array);       // Duplicate
+     * $array = dotToArray('pictures.name', $array);
+     * $array = dotToArray('pictures.title', $array);
+     *
+     * $array = ['tags' => ['name', 'color'],  'picture' => ['name', 'title']]
+     *
+     * @param $item
+     * @param $array
+     * @return array
+     */
+    public function dotToArray($item, $array = array())
+    {
+        if (is_null($array)) $array = array();
+        $exploded = explode('.', $item);
+        if (is_null($exploded) || empty($exploded) || (count($exploded) !== 2)) return $array;
+        else{
+            if (array_key_exists($exploded[0], $array))
+            {
+                if (!in_array($exploded[1], $array[$exploded[0]]))
+                    $array[$exploded[0]][] = $exploded[1];
+            }
+            else $array[$exploded[0]] = array($exploded[1]);
+            return $array;
+        }
+    }
 }

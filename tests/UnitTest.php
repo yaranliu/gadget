@@ -212,4 +212,22 @@ class UnitTest extends TestCase
     {
         $this->assertFalse($this->gadget->isTrue($a, $b, $c, $d));
     }
+
+    public function dotToArrayProvider()
+    {
+        return array(
+            array('color.red', array('shape' => ['box'], 'size' => ['large']), array('shape' => ['box'], 'size' => ['large'], 'color' => ['red']))
+        );
+    }
+
+    /**
+     * @param $a
+     * @param $b
+     * @param $c
+     * @dataProvider dotToArrayProvider
+     */
+    public function testDotToArray($a, $b, $c)
+    {
+        $this->assertEquals($this->gadget->dotToArray($a, $b), $c);
+    }
 }
