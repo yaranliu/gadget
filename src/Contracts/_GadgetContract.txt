@@ -1,0 +1,11 @@
+ public function explode($input);
+
+ public function explodeFromRequest($param, $base);
+
+ public function dotToArray($item, $array = array());
+
+ public function starArray($star, array $array);
+
+ public function adminRequest();
+
+ public function exceptWithQuery(array $except);
