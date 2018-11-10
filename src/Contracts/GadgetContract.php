@@ -9,8 +9,12 @@
 namespace Yaranliu\Gadget\Contracts;
 
 
+use Illuminate\Http\Request;
+
 interface GadgetContract
 {
+    public function emptyArray(array $arrayToClean, $string = true, $array = true);
+
     public function setBit($byte, $bit);
 
     public function resetBit($byte, $bit);
@@ -30,5 +34,21 @@ interface GadgetContract
     public function uppercase($text);
 
     public function isTrue($param);
+
+    public function dotToArray($item, $array = array());
+
+    public function inputOrDefault(Request $request, $key, $default);
+
+    public function keyAsArray(Request $request, $key, array $allItems = array(), array $defaultItems = array());
+
+    public function withRelations(Request $request, $with, array $allRelations = array(), array $defaultRelations = array());
+
+    public function querySorted($query, $definition, $dir = 'asc', $sortable = [], $strict = false);
+
+    public function buildFilterItem($filter);
+
+    public function getFilters($filterString);
+
+    public function searchFilterAndSort(Request $request, $query, $searchable, $sortable = []);
 
 }

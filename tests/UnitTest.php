@@ -8,6 +8,9 @@
 
 namespace Yaranliu\Gadget\Tests;
 
+use Illuminate\Database\Query\Builder;
+use Illuminate\Http\Request;
+use Yaranliu\Gadget\Exceptions\RelationNotExistingException;
 use Yaranliu\Gadget\Services\Gadget;
 
 class UnitTest extends TestCase
@@ -17,6 +20,26 @@ class UnitTest extends TestCase
     public function setUp()
     {
         $this->gadget = new Gadget();
+    }
+
+    public function emptyArrayProvider()
+    {
+        return array(
+            array(array("", 5, 'a'), array(5, 'a')),
+            array(array("", 5, 'a', [], false), array(5, 'a', false)),
+        );
+    }
+
+    /**
+     * @param $a
+     * @param $e
+     *
+     * @dataProvider emptyArrayProvider
+     */
+    public function testEmptyArray($a, $e)
+    {
+        var_dump($this->gadget->emptyArray($a));
+        $this->assertEquals($this->gadget->emptyArray($a), $e);
     }
 
     public function setBitProvider()
@@ -216,7 +239,9 @@ class UnitTest extends TestCase
     public function dotToArrayProvider()
     {
         return array(
-            array('color.red', array('shape' => ['box'], 'size' => ['large']), array('shape' => ['box'], 'size' => ['large'], 'color' => ['red']))
+            array('color.red', array('shape' => ['box'], 'size' => ['large']), array('shape' => ['box'], 'size' => ['large'], 'color' => ['red'])),
+            array('color.red', array(), array('color' => ['red'])),
+            array('color.red', null, array('color' => ['red'])),
         );
     }
 
@@ -230,4 +255,333 @@ class UnitTest extends TestCase
     {
         $this->assertEquals($this->gadget->dotToArray($a, $b), $c);
     }
+
+
+    public function inputOrDefaultProvider()
+    {
+        $test = [
+          [ 'key' => 'value', 'default' => 'default', 'expected' => 'value'],
+          [ 'key' => null, 'default' => 'default', 'expected' => null],
+          [ 'key' => 'red', 'default' => 'default', 'expected' => 'red'],
+        ];
+
+        $provider = array();
+
+        foreach ($test as $testItem) {
+
+            $r = new Request();
+
+            $r->replace(['key' => $testItem['key']]);
+
+            $provider[] = [$r, 'key', $testItem['default'], $testItem['expected']];
+
+        }
+        $rEmpty = new Request();
+
+        $provider[] = [$rEmpty, 'key', 'default', 'default'];
+
+        return $provider;
+    }
+
+
+    /**
+     * @param $r
+     * @param $k
+     * @param $d
+     * @param $e
+     *
+     * @dataProvider inputOrDefaultProvider
+     */
+    public function testInputOrDefault($r, $k, $d, $e)
+    {
+        $this->assertEquals($this->gadget->inputOrDefault($r, $k, $d), $e);
+    }
+
+    public function keyAsArrayProvider()
+    {
+        $test = [
+            [ 'key' => 'key', 'value' => '2', 'all' => ['1', '2', '3'], 'default' => ['3'], 'expected' => ['2']],
+            [ 'key' => 'key', 'value' => 'all', 'all' => ['1', '2', '3'], 'default' => ['3'], 'expected' => ['1', '2', '3']],
+            [ 'key' => 'key', 'value' => '1|2|3', 'all' => ['1', '2', '3'], 'default' => ['3'], 'expected' => ['1', '2', '3']],
+            [ 'key' => 'key', 'value' => '1|2|3|4', 'all' => ['1', '2', '3'], 'default' => ['3'], 'expected' => false],
+            [ 'key' => 'key', 'value' => 2, 'all' => ['1', 2, '3'], 'default' => [2], 'expected' => [2]],
+            [ 'key' => 'key', 'value' => 45.33, 'all' => [45, 45.33], 'default' => [45], 'expected' => [45.33]],
+            [ 'key' => 'key', 'value' => true, 'all' => ['1', '0', true, false], 'default' => [false], 'expected' => [true]],
+            [ 'key' => 'key', 'value' => 'a|b', 'all' => ['a', 'b', true, false], 'default' => [false], 'expected' => ['a', 'b']],
+        ];
+
+        $provider = array();
+
+        foreach ($test as $testItem) {
+
+            $r = new Request();
+
+            $r->replace([$testItem['key'] => $testItem['value']]);
+
+            $provider[] = [$r, $testItem['key'], $testItem['all'], $testItem['default'], $testItem['expected']];
+
+        }
+
+        return $provider;
+    }
+
+    public function keyAsArrayExceptionProvider()
+    {
+        $test = [
+            [ 'key' => 'key', 'value' => '2', 'all' => 1, 'default' => ['3']],
+            [ 'key' => 'key', 'value' => 'all', 'all' => ['1', '2', '3'], 'default' => 7],
+            [ 'key' => 'key', 'value' => '2', 'all' => ['1', '2', '3'], 'default' => null],
+            [ 'key' => 'key', 'value' => '2', 'all' => 2, 'default' => '3'],
+            [ 'key' => 'key', 'value' => '2', 'all' => [2], 'default' => 3],
+            [ 'key' => 'key', 'value' => '2', 'all' => null, 'default' => ['3', 4]],
+        ];
+
+        $provider = array();
+
+        foreach ($test as $testItem) {
+
+            $r = new Request();
+
+            $r->replace([$testItem['key'] => $testItem['value']]);
+
+            $provider[] = [$r, $testItem['key'], $testItem['all'], $testItem['default']];
+
+        }
+
+        return $provider;
+    }
+
+    public function keyAsArrayReturnDefaultProvider()
+    {
+        $test = [
+            ['all' => [1], 'default' => ['3'], 'expected' => ['3']],
+            ['all' => ['1', '2', true], 'default' => [[1,2]], 'expected' => [[1,2]]],
+            ['all' => ['1', '2', '3'], 'default' => [false], 'expected' => [false]],
+            ['all' => [[2, 5, 'test'], 'test', '3'], 'default' => [1, true], 'expected' => [1, true]],
+
+        ];
+
+        $provider = array();
+
+        foreach ($test as $testItem) {
+
+            $r = new Request();
+
+            $provider[] = [$r, $testItem['all'], $testItem['default'], $testItem['expected']];
+
+        }
+
+        return $provider;
+    }
+
+    /**
+     * @param $r
+     * @param $k
+     * @param $a
+     * @param $d
+     * @param $e
+     *
+     * @dataProvider keyAsArrayProvider
+     */
+    public function testKeyAsArray($r, $k, $a, $d, $e)
+    {
+        $this->assertEquals($this->gadget->keyAsArray($r, $k, $a, $d), $e);
+    }
+
+    /**
+     * @param $r
+     * @param $k
+     * @param $a
+     * @param $d
+     *
+     * @dataProvider keyAsArrayExceptionProvider
+     */
+    public function testKeyAsArrayException($r, $k, $a, $d)
+    {
+
+        $this->expectException(\TypeError::class);
+
+        $this->gadget->keyAsArray($r, $k, $a, $d);
+
+    }
+
+    /**
+     * @param $r
+     * @param $a
+     * @param $d
+     * @param $e
+     *
+     * @dataProvider keyAsArrayReturnDefaultProvider
+     */
+    public function testKeyAsArrayReturnDefault($r, $a, $d, $e)
+    {
+        $this->assertEquals($this->gadget->keyAsArray($r, 'key', $a, $d), $e);
+    }
+
+    public function withRelationsProvider()
+    {
+        $test = [
+            [ 'key' => 'with', 'value' => 'all', 'all' => ['likes', 'posts', 'followers', 'following'], 'default' => ['likes'], 'expected' => ['likes', 'posts', 'followers', 'following']],
+            [ 'key' => 'with', 'value' => 'likes|following', 'all' => ['likes', 'posts', 'followers', 'following'], 'default' => ['likes'], 'expected' => ['likes', 'following']],
+            [ 'key' => 'with', 'value' => '', 'all' => ['likes', 'posts', 'followers', 'following'], 'default' => ['likes'], 'expected' => ['likes']],
+            [ 'key' => 'with', 'value' => null, 'all' => ['likes', 'posts', 'followers', 'following'], 'default' => ['likes'], 'expected' => ['likes']],
+            [ 'key' => 'with', 'value' => 'posts', 'all' => ['likes', 'posts', 'followers', 'following'], 'default' => ['following'], 'expected' => ['posts']],
+        ];
+
+        $provider = array();
+
+        foreach ($test as $testItem) {
+
+            $r = new Request();
+
+            $r->replace([$testItem['key'] => $testItem['value']]);
+
+            $provider[] = [$r, $testItem['key'], $testItem['all'], $testItem['default'], $testItem['expected']];
+
+        }
+
+        return $provider;
+    }
+
+    /**
+     * @param $r
+     * @param $k
+     * @param $a
+     * @param $d
+     * @param $e
+     *
+     * @dataProvider withRelationsProvider
+     */
+    public function testWithRelationsProvider($r, $k, $a, $d, $e)
+    {
+        $this->assertEquals($this->gadget->withRelations($r, $k, $a, $d), $e);
+    }
+
+    public function withRelationsExceptionProvider()
+    {
+        $test = [
+            [ 'key' => 'with', 'value' => 'likes|following', 'all' => ['likes', 'posts', 'followers'], 'default' => ['likes']],
+            [ 'key' => 'with', 'value' => 'posts', 'all' => ['likes', 'followers', 'following'], 'default' => ['following']],
+        ];
+
+        $provider = array();
+
+        foreach ($test as $testItem) {
+
+            $r = new Request();
+
+            $r->replace([$testItem['key'] => $testItem['value']]);
+
+            $provider[] = [$r, $testItem['key'], $testItem['all'], $testItem['default']];
+
+        }
+
+        return $provider;
+    }
+
+    /**
+     * @param $r
+     * @param $k
+     * @param $a
+     * @param $d
+     *
+     * @dataProvider withRelationsExceptionProvider
+     */
+    public function testWithRelationsException($r, $k, $a, $d)
+    {
+
+        $this->expectException(RelationNotExistingException::class);
+
+        $this->gadget->withRelations($r, $k, $a, $d);
+
+    }
+
+    public function buildFilterItemProvider()
+    {
+        return array(
+            array('age.gt.[35]',[
+              'field' => 'age',
+              'operator' => 'gt',
+              'values' => [35]]),
+            array('color.in.[red~blue~magenta]',[
+              'field' => 'color',
+              'operator' => 'in',
+              'values' => ['red', 'blue', 'magenta']]),
+            array('color.in.[red~blue~magenta[', false),
+            array('color.in.red~blue~magenta]', false),
+            array('color.in.][red~blue~magenta', false),
+            array('color.in][red~blue~magenta', false),
+            array('color.in.][red~blue~magenta', false),
+            array('colorin.[red~blue~magenta]', false),
+            array('.lte.[red~blue~magenta]', false),
+            array('age.gt[red~blue~magenta]', false),
+            array('color.in.[red|blue|magenta]', [
+                'field' => 'color',
+                'operator' => 'in',
+                'values' => ['red|blue|magenta']]),
+            array('color.in.[red~blue~magenta~]', [
+                'field' => 'color',
+                'operator' => 'in',
+                'values' => ['red', 'blue', 'magenta']]),
+            array('color.in.[~~~red~blue~magenta~]', [
+                'field' => 'color',
+                'operator' => 'in',
+                'values' => ['red', 'blue', 'magenta']]),
+            array('color.in.values->>[~~~red~blue~magenta~]', [
+                'field' => 'color',
+                'operator' => 'in',
+                'values' => ['red', 'blue', 'magenta']]),
+            array('color.in.[]', null),
+            array('color.in.[~~]', null),
+        );
+    }
+
+    /**
+     * @param $f
+     * @param $e
+     *
+     * @dataProvider buildFilterItemProvider
+     */
+    public function testBuildFilterItem($f, $e)
+    {
+        $this->assertEquals($this->gadget->buildFilterItem($f), $e);
+    }
+
+    public function getFiltersProvider()
+    {
+        return array(
+            array('age.gt.[35]|likes.lte.[30]|color.in.[red~yellow]||',
+                [
+                    [
+                        'field' => 'age',
+                        'operator' => 'gt',
+                        'values' => [35]
+                        ],
+                    [
+                        'field' => 'likes',
+                        'operator' => 'lte',
+                        'values' => [30]
+                        ],
+                    [
+                        'field' => 'color',
+                        'operator' => 'in',
+                        'values' => ['red', 'yellow']
+                    ]]),
+            array('age.gt..]35]|likes.lte.[30]|color.in.[red~yellow]||', false),
+            array('age.gt.[35]|likes..[30]|color.in.[red~yellow]||', false),
+            array('..gt..]35]|likes.lte.[30]|color.in.[red~yellow]||', false),
+        );
+    }
+
+    /**
+     * @param $s
+     * @param $e
+     *
+     * @dataProvider getFiltersProvider
+     */
+    public function testGetFilters($s, $e)
+    {
+        $this->assertEquals($this->gadget->getFilters($s), $e);
+    }
+
 }
