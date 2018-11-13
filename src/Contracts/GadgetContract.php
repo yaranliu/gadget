@@ -41,7 +41,7 @@ interface GadgetContract
 
     public function keyAsArray(Request $request, $key, array $allItems = array(), array $defaultItems = array());
 
-    public function withRelations(Request $request, $with, array $allRelations = array(), array $defaultRelations = array());
+    public function with(Request $request, array $allRelations = array(), array $defaultRelations = array());
 
     public function querySorted($query, $definition, $dir = 'asc', $sortable = [], $strict = false);
 

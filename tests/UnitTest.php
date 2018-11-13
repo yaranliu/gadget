@@ -418,7 +418,7 @@ class UnitTest extends TestCase
         $this->assertEquals($this->gadget->keyAsArray($r, 'key', $a, $d), $e);
     }
 
-    public function withRelationsProvider()
+    public function withProvider()
     {
         $test = [
             [ 'key' => 'with', 'value' => 'all', 'all' => ['likes', 'posts', 'followers', 'following'], 'default' => ['likes'], 'expected' => ['likes', 'posts', 'followers', 'following']],
@@ -450,14 +450,14 @@ class UnitTest extends TestCase
      * @param $d
      * @param $e
      *
-     * @dataProvider withRelationsProvider
+     * @dataProvider withProvider
      */
-    public function testWithRelationsProvider($r, $k, $a, $d, $e)
+    public function testWithProvider($r, $k, $a, $d, $e)
     {
-        $this->assertEquals($this->gadget->withRelations($r, $k, $a, $d), $e);
+        $this->assertEquals($this->gadget->with($r, $a, $d), $e);
     }
 
-    public function withRelationsExceptionProvider()
+    public function withExceptionProvider()
     {
         $test = [
             [ 'key' => 'with', 'value' => 'likes|following', 'all' => ['likes', 'posts', 'followers'], 'default' => ['likes']],
@@ -485,14 +485,14 @@ class UnitTest extends TestCase
      * @param $a
      * @param $d
      *
-     * @dataProvider withRelationsExceptionProvider
+     * @dataProvider withExceptionProvider
      */
-    public function testWithRelationsException($r, $k, $a, $d)
+    public function testWithException($r, $k, $a, $d)
     {
 
         $this->expectException(RelationNotExistingException::class);
 
-        $this->gadget->withRelations($r, $k, $a, $d);
+        $this->gadget->with($r, $a, $d);
 
     }
 

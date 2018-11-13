@@ -13,6 +13,7 @@ return [
     'lookup_limit' =>  10,
 
     'word' => [
+        'with' => 'with',
         'filter' => 'filter',
         'search' =>  'search',
         'order_by' => 'sort_by',

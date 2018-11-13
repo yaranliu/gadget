@@ -277,16 +277,15 @@ class Gadget implements GadgetContract
      * Please note that 'allRelations' and 'defaultRelations' properties must be declared as array on the Model class
      *
      * @param \Illuminate\Http\Request $request
-     * @param $with
      * @param array $allRelations
      * @param array $defaultRelations
      * @return array|null|string
      * @throws RelationNotExistingException
      */
-    public function withRelations(Request $request, $with, array $allRelations = array(), array $defaultRelations = array())
+    public function with(Request $request, array $allRelations = array(), array $defaultRelations = array())
     {
 
-        $array = $this->keyAsArray($request, $with, $allRelations, $defaultRelations);
+        $array = $this->keyAsArray($request, $this->config->get('gadget.word.with', 'with'), $allRelations, $defaultRelations);
 
         if ($array === false) throw new RelationNotExistingException();
         else return $array;
