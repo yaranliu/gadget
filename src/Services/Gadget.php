@@ -285,10 +285,13 @@ class Gadget implements GadgetContract
     public function with(Request $request, array $allRelations = array(), array $defaultRelations = array())
     {
 
-        $array = $this->keyAsArray($request, $this->config->get('gadget.word.with', 'with'), $allRelations, $defaultRelations);
+        $wWith = $this->config->get('gadget.word.with', 'with');
+        if ($request->has($wWith)) {
+            $array = $this->keyAsArray($request, $wWith, $allRelations, $defaultRelations);
 
-        if ($array === false) throw new RelationNotExistingException();
-        else return $array;
+            if ($array === false) throw new RelationNotExistingException();
+            else return $array;
+        } else return $defaultRelations;
 
     }
 
