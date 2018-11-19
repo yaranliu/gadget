@@ -9,7 +9,17 @@
 namespace Yaranliu\Gadget\Exceptions;
 
 
-class ResourceOwnerArrayNotValidException
+class ResourceOwnerArrayNotValidException extends \Exception
 {
+
+    public function report()
+    {
+
+    }
+
+    public function render($request)
+    {
+        return response()->json(['error' => '500', 'message' => 'Resource owner array definition ($resourceOwner) is not valid'], 500);
+    }
 
 }

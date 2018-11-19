@@ -10,7 +10,7 @@ namespace Yaranliu\Gadget\Exceptions;
 
 use Exception;
 
-class InvalidFilterTypeException extends Exception
+class InvalidFilterValuesDefinitionException extends Exception
 {
     public function report()
     {
@@ -19,6 +19,6 @@ class InvalidFilterTypeException extends Exception
 
     public function render($request)
     {
-        return response()->json(['error' => '500', 'message' => 'Invalid filter type in definition'], 500);
+        return response()->json(['error' => '500', 'message' => 'Invalid option in "values" definition'], 500);
     }
 }

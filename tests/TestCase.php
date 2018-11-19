@@ -23,7 +23,7 @@ class TestCase extends \Orchestra\Testbench\TestCase
     protected function getPackageAliases($app)
     {
         return [
-            'Gadget' => Gadget::class,
+            'Gadget' => 'Gadget\Facade'
         ];
     }
 

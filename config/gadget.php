@@ -34,4 +34,13 @@ return [
         'sibling' => '.'
     ],
 
+    'filters_definitions' => [
+        'label' => 'label',
+        'value' => 'value',
+        'icon' => 'icon',
+        'color' => 'color',
+        'true_label' => 'True',
+        'false_label' => 'False'
+    ]
+
 ];

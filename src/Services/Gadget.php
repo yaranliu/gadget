@@ -1,23 +1,50 @@
 <?php
-
+/**
+ * Helper functions and request parsing utilities
+ *
+ */
 namespace Yaranliu\Gadget\Services;
 
-use Illuminate\Config\Repository;
-use Illuminate\Http\Request;
-use function PHPSTORM_META\type;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Request;
 use Yaranliu\Gadget\Contracts\GadgetContract;
 use Yaranliu\Gadget\Exceptions\InvalidFilterStringException;
+use Yaranliu\Gadget\Exceptions\InvalidFilterTypeException;
+use Yaranliu\Gadget\Exceptions\InvalidFilterValuesDefinitionException;
 use Yaranliu\Gadget\Exceptions\RelationNotExistingException;
 use Yaranliu\Gadget\Exceptions\UnknownFilterOperatorException;
 
+/**
+ * Class Gadget
+ *
+ * A simple package for a few helper functions and GET request parser.
+ *
+ * @author Ufuk Yaranlı <ufuk@yaranli.net>
+ * @package yaranliu/gadget
+ */
 class Gadget implements GadgetContract
 {
-    protected $config;
-    protected $app;
 
-    public function __construct()
+    /**
+     * For testing
+     *
+     * @param $param
+     * @return mixed
+     */
+    public function requestMocked($param)
     {
-        $this->config = new Repository();
+        return \Illuminate\Support\Facades\Request::input($param);
+    }
+
+    /**
+     * Returns package configuration
+     *
+     * @return mixed
+     */
+    public function configurationDefaults()
+    {
+        return Config::get('gadget');
     }
 
     /**
@@ -46,8 +73,8 @@ class Gadget implements GadgetContract
     /**
      * Sets nth bit ($bit) of $byte to 1
      *
-     * @param $byte
-     * @param $bit
+     * @param int $byte
+     * @param int $bit
      * @return int
      */
     public function setBit($byte, $bit)
@@ -90,7 +117,7 @@ class Gadget implements GadgetContract
     {
         if (is_null($input)) return array();
         if (is_array($input)) return $input;
-        if (is_string($input)) return explode($this->config->get('gadget.sign.delimiter.first', '|'), $input);
+        if (is_string($input)) return explode(Config::get('gadget.sign.delimiter.first', '|'), $input);
         else return array($input);
     }
 
@@ -217,15 +244,14 @@ class Gadget implements GadgetContract
     /**
      * Returns the request parameter's value or the default value
      *
-     * @param \Illuminate\Http\Request $request
      * @param $key
      * @param $default
      * @return array|null|string
      */
-    public function inputOrDefault(Request $request, $key, $default)
+    public function inputOrDefault($key, $default)
     {
-        if ( $request->has($key) ) {
-            return ($request->input($key) === "") ? $default : $request->input($key);
+        if ( Request::has($key) ) {
+            return (Request::input($key) === "") ? $default : Request::input($key);
         }
         else return $default;
     }
@@ -237,21 +263,20 @@ class Gadget implements GadgetContract
      *
      * If there is an item in the request param array which is NOT an element of the $allItems array, FALSE is returned
      *
-     * @param \Illuminate\Http\Request $request
      * @param $key
      * @param array $allItems
      * @param array $defaultItems
      * @return array|bool|null|string
      */
-    public function keyAsArray(Request $request, $key, array $allItems = array(), array $defaultItems = array())
+    public function keyAsArray($key, array $allItems = array(), array $defaultItems = array())
     {
-        $items = $this->inputOrDefault($request, $key, array());
+        $items = $this->inputOrDefault($key, array());
 
         if (!empty($items))
         {
-            if (strtolower($items) === $this->config->get('gadget.word.all', 'all')) $items = $allItems;
+            if (strtolower($items) === Config::get('gadget.word.all', 'all')) $items = $allItems;
             else {
-                $items = explode($this->config->get('gadget.sign.delimiter.first', '|'), $items);
+                $items = explode(Config::get('gadget.sign.delimiter.first', '|'), $items);
                 if (!empty(array_diff($items, $allItems))) return false;
             }
         }
@@ -262,32 +287,34 @@ class Gadget implements GadgetContract
     /**
      * Utilizes keyAsArray function to obtain which relations to be loaded by the request.
      *
-     * RelationNotExistingException is  thrown if there is an item in the request param array
-     * which is NOT an element of the $allItems array,
+     * ```RelationNotExistingException``` is  thrown if there is an item in the request param array
+     * which is NOT an element of the ```$allItems``` array.
      *
-     * Use case:
+     * <b>Use case</b>:
+     *
      * if HTTP Request has a parameter e.g. 'with',  decides which relations are to be loaded by looking at the Model's
-     * $relations (all) and $defaultRelations (if there is no 'with' parameter on the request)
+     * ```$relations``` (all) and ```$defaultRelations``` (if there is no 'with' parameter on the request)
      *
-     * If client sends a HTTP request ?with=all all of the relations will be loaded.
+     * If client sends an HTTP GET request ```?with=all``` all of the relations will be loaded.
      *
+     * ```
      * $with = Gadget::loadRelations($request, 'with', $this->allRelations, $this->defaultRelations);
      * $entities = Model::with($with)->all();
+     * ```
      *
-     * Please note that 'allRelations' and 'defaultRelations' properties must be declared as array on the Model class
+     * Please note that ```allRelations``` and ```defaultRelations``` properties must be declared as array on the Model class
      *
-     * @param \Illuminate\Http\Request $request
      * @param array $allRelations
      * @param array $defaultRelations
      * @return array|null|string
      * @throws RelationNotExistingException
      */
-    public function with(Request $request, array $allRelations = array(), array $defaultRelations = array())
+    public function with(array $allRelations = array(), array $defaultRelations = array())
     {
 
-        $wWith = $this->config->get('gadget.word.with', 'with');
-        if ($request->has($wWith)) {
-            $array = $this->keyAsArray($request, $wWith, $allRelations, $defaultRelations);
+        $wWith = Config::get('gadget.word.with', 'with');
+        if (Request::has($wWith)) {
+            $array = $this->keyAsArray($wWith, $allRelations, $defaultRelations);
 
             if ($array === false) throw new RelationNotExistingException();
             else return $array;
@@ -344,15 +371,17 @@ class Gadget implements GadgetContract
     }
 
     /**
+     * Internal method for building filters
+     *
      * @param $filter
      * @return array|bool|null
      */
-    public function buildFilterItem($filter)
+    private function buildFilterItem($filter)
     {
-        $sibling = $this->config->get('gadget.sign.sibling', '.');
-        $lStart = $this->config->get('gadget.sign.list.start', '[');
-        $lEnd = $this->config->get('gadget.sign.list.end', ']');
-        $sDelimiter = $this->config->get('gadget.sign.delimiter.second', '~');
+        $sibling = Config::get('gadget.sign.sibling', '.');
+        $lStart = Config::get('gadget.sign.list.start', '[');
+        $lEnd = Config::get('gadget.sign.list.end', ']');
+        $sDelimiter = Config::get('gadget.sign.delimiter.second', '~');
         $firstDot = strpos($filter, $sibling);
         $secondDot = strpos($filter, $sibling,$firstDot + 1 );
         $firstSquare = strpos($filter, $lStart);
@@ -379,6 +408,8 @@ class Gadget implements GadgetContract
     }
 
     /**
+     * Request parser for building filters
+     *
      * @param $filterString
      * @return array|bool|null
      */
@@ -387,7 +418,7 @@ class Gadget implements GadgetContract
         if (($filterString == '') || is_null($filterString)) return null;
 
         $filters = [];
-        $items = $this->emptyArray(explode($this->config->get('gadget.sign.delimiter.first', '|'), $filterString));
+        $items = $this->emptyArray(explode(Config::get('gadget.sign.delimiter.first', '|'), $filterString));
         foreach ($items as $item)
         {
             $filterItem = $this->buildFilterItem($item);
@@ -406,7 +437,6 @@ class Gadget implements GadgetContract
      * Use case:
      * General GET requests for lists (searchable, filtered and sorted) e.g. products
      *
-     * @param Request $request
      * @param $query
      * @param $searchable
      * @param array $sortable
@@ -414,18 +444,18 @@ class Gadget implements GadgetContract
      * @throws InvalidFilterStringException
      * @throws UnknownFilterOperatorException
      */
-    public function searchFilterAndSort(Request $request, $query, $searchable, $sortable = [])
+    public function searchFilterAndSort($query, array $searchable, array $sortable = [])
     {
 
-        $wFilter = $this->config->get('gadget.word.filter', 'filter');
-        $wSearch = $this->config->get('gadget.word.search', 'search');
-        $wOrderBy = $this->config->get('gadget.word.order_by', 'sort_by');
-        $wDescending = $this->config->get('gadget.word.descending', 'descending');
-        $sDelimiter = $this->config->get('gadget.sign.delimiter.second', '~');
+        $wFilter = Config::get('gadget.word.filter', 'filter');
+        $wSearch = Config::get('gadget.word.search', 'search');
+        $wOrderBy = Config::get('gadget.word.order_by', 'sort_by');
+        $wDescending = Config::get('gadget.word.descending', 'descending');
+        $sDelimiter = Config::get('gadget.sign.delimiter.second', '~');
 
         $return = $query;
 
-        $filters = ($request->has($wFilter)) ? $request->query($wFilter) : null;
+        $filters = (Request::has($wFilter)) ? Request::query($wFilter) : null;
 
         $filters = $this->getFilters($filters);
         if ($filters === false) throw new InvalidFilterStringException();
@@ -463,8 +493,8 @@ class Gadget implements GadgetContract
             }
         }
 
-        if ($request->has($wSearch)) {
-            $search = $this->query($wSearch);
+        if (Request::has($wSearch)) {
+            $search = Request::query($wSearch);
             if ($search != '') {
                 $searchItems = explode($sDelimiter, $search);
                 foreach ($searchItems as $searchItem) {
@@ -484,107 +514,212 @@ class Gadget implements GadgetContract
             }
         }
 
-        if ($request->has($wOrderBy)) {
-            if ($request->has($wDescending)) {
-                $dir = ($this->isTrue($request->query($wDescending))) ? 'desc' : 'asc';
-                $return = $this->querySorted($return, $request->query($wOrderBy), $dir, $sortable);
+        if (Request::has($wOrderBy)) {
+            if (Request::has($wDescending)) {
+                $dir = ($this->isTrue(Request::query($wDescending))) ? 'desc' : 'asc';
+                $return = $this->querySorted($return, Request::query($wOrderBy), $dir, $sortable);
             }
             else
-                $return = $this->querySorted($return, $request->query($wOrderBy), 'asc', $sortable);
+                $return = $this->querySorted($return, Request::query($wOrderBy), 'asc', $sortable);
         }
 
         return $return;
     }
 
-    //    public function getFilterDefinitions($baseTable, $filterDefinitions)
-//    {
-//        $result = [];
-//
-//        $app_owner_id = \App\User::with('owner')->find(\Illuminate\Support\Facades\Auth::id())->owner->id;
-//
-//        foreach ($filterDefinitions as $definition) {
-//
-//            switch ($definition['type']) {
-//                case 'text': {
-//                    if ($definition['lookup'] == 'values') {
-//                        $data = array_pluck(
-//                            \Illuminate\Support\Facades\DB::table($baseTable)->where('app_owner_id', $app_owner_id)
-//                                ->select($definition['field'])->distinct()->orderBy($definition['field'])->get(),
-//                            $definition['field']);
-//                        $values = [];
-//                        foreach ($data as $d) {
-//                            if (!is_null($d)) $values[] = ['label' => $d, 'value' => $d];
-//                        }
-//                    } else
-//                    {
-//                        $lookup = explode(':', $definition['lookup']);
-//                        if ($lookup[0] === 'table') {
-//                            $lookupDefs = explode(",", $lookup[1]);
-//                            $array = array_pluck(
-//                                \Illuminate\Support\Facades\DB::table($baseTable)->where('app_owner_id', $app_owner_id)
-//                                    ->select($definition['field'])->distinct()->orderBy($definition['field'])->get(),
-//                                $definition['field']);
-//                            $data = \Illuminate\Support\Facades\DB::table($lookupDefs[0])->whereIn($lookupDefs[1], $array)
-//                                ->orderBy($lookupDefs[2])->get();
-//                            $values = [];
-//                            foreach ($data as $item) {
-//                                $valueToAdd = [ 'label' => $item->{$lookupDefs[2]}, 'value' => $item->{$lookupDefs[1]}];
-//
-//                                switch (sizeof($lookupDefs)) {
-//                                    case 3:
-//                                        $valueToAdd = [ 'label' => $item->{$lookupDefs[2]}, 'value' => $item->{$lookupDefs[1]}];
-//                                        break;
-//                                    case 4:
-//                                        $valueToAdd = [ 'label' => $item->{$lookupDefs[2]}, 'value' => $item->{$lookupDefs[1]}, 'icon' => $item->{$lookupDefs[3]}];
-//                                        break;
-//                                    case 5:
-//                                        $valueToAdd = [ 'label' => $item->{$lookupDefs[2]}, 'value' => $item->{$lookupDefs[1]}, 'icon' => $item->{$lookupDefs[3]}, 'color' => $item->{$lookupDefs[4]}];
-//                                        break;
-//                                    default:
-//                                        break;
-//                                }
-//
-//                                $values[] = $valueToAdd;
-//                            }
-//                        }
-//                    }
-//                    break;
-//                }
-//                case 'boolean': {
-//                    $values = [
-//                        ['label' => 'True', 'value' => true],
-//                        ['label' => 'False', 'value' => false],
-//                    ];
-//                    break;
-//                }
-//                case 'numeric': {
-//                    $values = null;
-//                    break;
-//                }
-//                default: {
-//                    $values = null;
-//                }
-//            }
-//
-//            if (is_null($values)) {
-//                $result[] = [
-//                    'field' => $definition['field'],
-//                    'type'  => $definition['type'],
-//                    'label' => $definition['label'],
-//                ];
-//            } else {
-//                $result[] = [
-//                    'field' => $definition['field'],
-//                    'type'  => $definition['type'],
-//                    'label' => $definition['label'],
-//                    'items' => $values
-//                ];
-//            }
-//
-//
-//        }
-//
-//        return $result;
-//
-//    }
+    /**
+     * Gets the filter definitions for the base table to be filtered
+     *
+     * ```$baseTable``` is the source from where the filter definitions will be resolved.
+     *
+     * ```$filterDefinitions``` is the array for the structure of the filter to be generated.
+     *
+     * ```$preFilter``` is the array for pre-filtering the definitions, defaults to ```null```
+     *
+     * ```$limit``` is the max number of values to be retrieved as filter item, defaults to ```20```
+     *
+     * ####Structure of the ```$filterDefinitions``` parameter
+     *
+     * ```
+     * $filterDefinitions = [
+     *      [
+     *          'field'     => 'account_type_id',
+     *          'label'     => 'Account type',
+     *          'type'      => 'text',
+     *          'lookup'    => 'table:account_types,id,name,icon,color', // or table:categories,id,name
+     *      ],
+     *      [
+     *          'field'     => 'category',
+     *          'label'     => 'Category',
+     *          'type'      => 'text',
+     *          'lookup'    => 'values', // or table:brands,id,label
+     *      ]
+     *  ];
+     *
+     * ```
+     *
+     * ```field```
+     *
+     * ultimate field to be filtered
+     *
+     * ```label```
+     *
+     * display value to be used in the front-end application
+     *
+     * ```type```
+     *
+     * data type to be used while evaluating the filter value. *Options* are <text>, <boolean> and <numeric>
+     *
+     * ```lookup```
+     *
+     * required if ```type``` is ```text```
+     *
+     * ####Structure of the ```lookup``` entry in ````filterDefinitions``` parameter array
+     *
+     * ```values```
+     *
+     * All the distinct values of ```field``` in the ```$baseTable``` will be retrieved and returned.
+     *
+     *```table:table,linked-field,display-field```
+     *
+     * The return values for the filter options will be retrieved from a lookup table, e.g. definitions.
+     * Two additional fields can be indicated to point the icon and color of the lookup field if exist in the underlying table
+     * ```<icon>``` and ```<color>```. See example above.
+     *
+     * ####Structure of the ```$preFilter``` array
+     *
+     * ```
+     * [ 'field1' => 'value1', 'field2' => 'value2', ... ]
+     *
+     * ```
+     *
+     * ```$preFilter``` is particularly useful for filtering out the available definitions before retrieving any data from the underlying table.
+     * For example, assume that there are multiple companies
+     * selling their products using the same application.
+     * The products of all companies are stored in ```products``` table with ```company_id``` column
+     * referencing to the company which the product belongs to.
+     * When the client interface needs to show filter options for the products of a particular company,
+     * the lookup definitions need to be filtered before any option sent to the client.
+     * So, providing ```['company_id' => <Authenticated user's company id>]``` will show only the filter definitions of the products owned by
+     * the authenticated user's company.
+     *
+     * @param string $baseTable
+     * @param array $filterDefinitions
+     * @param array $preFilter
+     * @param int $limit
+     * @return array
+     * @throws  InvalidFilterTypeException|InvalidFilterValuesDefinitionException
+     */
+    public function getFilterDefinitions($baseTable, array $filterDefinitions, $preFilter = array(), $limit = 20)
+    {
+
+        $types = array_diff(array_unique(array_column($filterDefinitions, 'type')), ['string', 'number', 'boolean']);
+
+        if (!empty($types)) throw new InvalidFilterTypeException();
+
+        $result = [];
+        $values = null;
+
+        foreach ($filterDefinitions as $definition) {
+            switch ($definition['type']) {
+                case 'boolean': {
+                    $values = [
+                        ['label' => 'True', 'value' => true],
+                        ['label' => 'False', 'value' => false],
+                    ];
+                    break;
+                }
+                case 'number': {
+                    $values = null;
+                    break;
+                }
+                case 'string': {
+
+                    $valueDefinitions = explode(':', $definition['values']);
+
+                    $query = array();
+                    if (in_array($valueDefinitions[0], ['table', 'lookup']))
+                    {
+                        if (empty($preFilter)) $query =  DB::table($baseTable)->select($definition['field'])->distinct()->orderBy($definition['field'])->limit($limit)->get()->all();
+                        else {
+                            $query = DB::table($baseTable);
+                            foreach ($preFilter as $key => $value) $query = $query->where($key, $value);
+                            $query = $query->select($definition['field'])->distinct()->orderBy($definition['field'])->limit($limit)->get()->all();
+                        }
+                        $query = array_pluck($query, $definition['field']);
+                    }
+                    $valueDefinitionItems = array();
+                    if (in_array($valueDefinitions[0], ['list', 'lookup'])) {
+                        $valueDefinitionItems = explode(',', $valueDefinitions[1]);
+                    }
+
+                    switch ($valueDefinitions[0]) {
+                        case 'table': {
+                            $values = [];
+                            foreach ($query as $d) {
+                                if (!is_null($d)) $values[] = ['label' => $d, 'value' => $d];
+                            }
+                            break;
+                        };
+                        case 'lookup': {
+                            $array = $query;
+                            $data = DB::table($valueDefinitionItems[0])->whereIn($valueDefinitionItems[1], $array)
+                                ->orderBy($valueDefinitionItems[2])->get();
+                            $values = [];
+                            $keys = array('value', 'label', 'color', 'icon');
+                            foreach ($data as $item) {
+                                $i = 0;
+                                $valueToAdd = array();
+                                while ($i < count($valueDefinitionItems) - 1)
+                                {
+                                    $valueToAdd = array_add($valueToAdd, $keys[$i], $item->{$valueDefinitionItems[$i + 1]});
+                                    $i++;
+                                }
+
+                                $values[] = $valueToAdd;
+                            }
+                            break;
+                        }
+                        case 'list': {
+                            $values = [];
+                            foreach (explode('|', $valueDefinitions[1]) as $items)
+                            {
+                                $itemArray = explode(',', $items);
+                                $values[] = ['value' => $itemArray[0], 'label' => $itemArray[1]];
+                            }
+                            break;
+                        };
+                        default: {
+                            throw new InvalidFilterValuesDefinitionException();
+                            break;
+                        }
+                    }
+
+                    break;
+                }
+                default: {
+                    break;
+                }
+            }
+
+            if (is_null($values)) {
+                $result[] = [
+                    'field' => $definition['field'],
+                    'type'  => $definition['type'],
+                    'label' => $definition['label'],
+                ];
+            } else {
+                $result[] = [
+                    'field' => $definition['field'],
+                    'type'  => $definition['type'],
+                    'label' => $definition['label'],
+                    'items' => $values
+                ];
+            }
+
+
+        }
+
+        return $result;
+
+    }
 }

@@ -8,19 +8,17 @@
 
 namespace Yaranliu\Gadget\Tests;
 
-use Illuminate\Database\Query\Builder;
-use Illuminate\Http\Request;
+use Mockery\Mock;
 use Yaranliu\Gadget\Exceptions\RelationNotExistingException;
-use Yaranliu\Gadget\Services\Gadget;
+use Yaranliu\Gadget\Facades\Gadget;
 
 class UnitTest extends TestCase
 {
-    protected $gadget;
 
-    public function setUp()
-    {
-        $this->gadget = new Gadget();
-    }
+//    public function setUp()
+//    {
+//        parent::setUp();
+//    }
 
     public function emptyArrayProvider()
     {
@@ -38,8 +36,7 @@ class UnitTest extends TestCase
      */
     public function testEmptyArray($a, $e)
     {
-        var_dump($this->gadget->emptyArray($a));
-        $this->assertEquals($this->gadget->emptyArray($a), $e);
+        $this->assertEquals(Gadget::emptyArray($a), $e);
     }
 
     public function setBitProvider()
@@ -60,7 +57,7 @@ class UnitTest extends TestCase
      */
     public function testSetBit($a, $b, $c)
     {
-        $this->assertEquals($this->gadget->setBit($a, $b), $c);
+        $this->assertEquals(Gadget::setBit($a, $b), $c);
     }
 
     public function resetBitProvider()
@@ -81,7 +78,7 @@ class UnitTest extends TestCase
      */
     public function testResetBit($a, $b, $c)
     {
-        $this->assertEquals($this->gadget->resetBit($a, $b), $c);
+        $this->assertEquals(Gadget::resetBit($a, $b), $c);
     }
 
     public function checkBitProvider()
@@ -102,7 +99,7 @@ class UnitTest extends TestCase
      */
     public function testCheckBit($a, $b, $c)
     {
-        $this->assertEquals($this->gadget->checkBit($a, $b), $c);
+        $this->assertEquals(Gadget::checkBit($a, $b), $c);
     }
 
     public function cArrayProvider()
@@ -123,7 +120,8 @@ class UnitTest extends TestCase
      */
     public function testCArray($a, $b)
     {
-        $this->assertEquals($this->gadget->cArray($a), $b);
+//        $this->assertEquals(Gadget::cArray($a), $b);
+        $this->assertEquals(Gadget::cArray($a), $b);
     }
 
     public function lowercaseProvider()
@@ -145,7 +143,7 @@ class UnitTest extends TestCase
      */
     public function testLowercase($a, $b, $c)
     {
-        $this->assertEquals($this->gadget->lowercase($a, $c), $b);
+        $this->assertEquals(Gadget::lowercase($a, $c), $b);
     }
 
     public function uppercaseProvider()
@@ -167,7 +165,7 @@ class UnitTest extends TestCase
      */
     public function testUppercase($a, $b, $c)
     {
-        $this->assertEquals($this->gadget->uppercase($a, $c), $b);
+        $this->assertEquals(Gadget::uppercase($a, $c), $b);
     }
 
     public function isTrueAsTrueProvider()
@@ -199,7 +197,7 @@ class UnitTest extends TestCase
      */
     public function testIsTrueAsTrue($a, $b, $c, $d)
     {
-        $this->assertTrue($this->gadget->isTrue($a, $b, $c, $d));
+        $this->assertTrue(Gadget::isTrue($a, $b, $c, $d));
     }
 
     public function isTrueAsFalseProvider()
@@ -233,7 +231,7 @@ class UnitTest extends TestCase
      */
     public function testIsTrueAsFalse($a, $b, $c, $d)
     {
-        $this->assertFalse($this->gadget->isTrue($a, $b, $c, $d));
+        $this->assertFalse(Gadget::isTrue($a, $b, $c, $d));
     }
 
     public function dotToArrayProvider()
@@ -253,129 +251,76 @@ class UnitTest extends TestCase
      */
     public function testDotToArray($a, $b, $c)
     {
-        $this->assertEquals($this->gadget->dotToArray($a, $b), $c);
+        $this->assertEquals(Gadget::dotToArray($a, $b), $c);
     }
 
 
     public function inputOrDefaultProvider()
     {
-        $test = [
-          [ 'key' => 'value', 'default' => 'default', 'expected' => 'value'],
-          [ 'key' => null, 'default' => 'default', 'expected' => null],
-          [ 'key' => 'red', 'default' => 'default', 'expected' => 'red'],
+        return [
+          [ '/test?key=value', 'key' => 'key', 'default' => 'default', 'expected' => 'value'],
+          [ '/test?key=', 'key' => 'key', 'default' => 'default', 'expected' => null],
+          [ '/test?key=red', 'key' => 'key', 'default' => 'default', 'expected' => 'red'],
         ];
-
-        $provider = array();
-
-        foreach ($test as $testItem) {
-
-            $r = new Request();
-
-            $r->replace(['key' => $testItem['key']]);
-
-            $provider[] = [$r, 'key', $testItem['default'], $testItem['expected']];
-
-        }
-        $rEmpty = new Request();
-
-        $provider[] = [$rEmpty, 'key', 'default', 'default'];
-
-        return $provider;
     }
 
 
     /**
-     * @param $r
+     * @param $u
      * @param $k
      * @param $d
      * @param $e
      *
      * @dataProvider inputOrDefaultProvider
      */
-    public function testInputOrDefault($r, $k, $d, $e)
+    public function testInputOrDefault($u, $k, $d, $e)
     {
-        $this->assertEquals($this->gadget->inputOrDefault($r, $k, $d), $e);
+        $this->get($u);
+
+        $this->assertEquals(Gadget::inputOrDefault($k, $d), $e);
     }
 
     public function keyAsArrayProvider()
     {
-        $test = [
-            [ 'key' => 'key', 'value' => '2', 'all' => ['1', '2', '3'], 'default' => ['3'], 'expected' => ['2']],
-            [ 'key' => 'key', 'value' => 'all', 'all' => ['1', '2', '3'], 'default' => ['3'], 'expected' => ['1', '2', '3']],
-            [ 'key' => 'key', 'value' => '1|2|3', 'all' => ['1', '2', '3'], 'default' => ['3'], 'expected' => ['1', '2', '3']],
-            [ 'key' => 'key', 'value' => '1|2|3|4', 'all' => ['1', '2', '3'], 'default' => ['3'], 'expected' => false],
-            [ 'key' => 'key', 'value' => 2, 'all' => ['1', 2, '3'], 'default' => [2], 'expected' => [2]],
-            [ 'key' => 'key', 'value' => 45.33, 'all' => [45, 45.33], 'default' => [45], 'expected' => [45.33]],
-            [ 'key' => 'key', 'value' => true, 'all' => ['1', '0', true, false], 'default' => [false], 'expected' => [true]],
-            [ 'key' => 'key', 'value' => 'a|b', 'all' => ['a', 'b', true, false], 'default' => [false], 'expected' => ['a', 'b']],
+        return [
+//            [ url, key, all, default, expected],
+            [ '/test?key=2', 'key', ['1', '2', '3'], ['3'], ['2']],
+            [ '/test?key=all', 'key', ['1', '2', '3'], ['3'], ['1', '2', '3']],
+            [ '/test?key=1|2|3', 'key', ['1', '2', '3'], ['3'], ['1', '2', '3']],
+            [ '/test?key=1|2|3|4', 'key', ['1', '2', '3'], ['3'], false],
+            [ '/test?key=2', 'key', ['1', 2, '3'], [2], [2]],
+            [ '/test?key=45.33', 'key', [45, 45.33], [45], [45.33]],
+            [ '/test?key=1', 'key', ['1', '0', true, false], [false], [true]],
+            [ '/test?key=a|b', 'key', ['a', 'b', true, false], [false], ['a', 'b']],
         ];
 
-        $provider = array();
-
-        foreach ($test as $testItem) {
-
-            $r = new Request();
-
-            $r->replace([$testItem['key'] => $testItem['value']]);
-
-            $provider[] = [$r, $testItem['key'], $testItem['all'], $testItem['default'], $testItem['expected']];
-
-        }
-
-        return $provider;
     }
 
     public function keyAsArrayExceptionProvider()
     {
-        $test = [
-            [ 'key' => 'key', 'value' => '2', 'all' => 1, 'default' => ['3']],
-            [ 'key' => 'key', 'value' => 'all', 'all' => ['1', '2', '3'], 'default' => 7],
-            [ 'key' => 'key', 'value' => '2', 'all' => ['1', '2', '3'], 'default' => null],
-            [ 'key' => 'key', 'value' => '2', 'all' => 2, 'default' => '3'],
-            [ 'key' => 'key', 'value' => '2', 'all' => [2], 'default' => 3],
-            [ 'key' => 'key', 'value' => '2', 'all' => null, 'default' => ['3', 4]],
+        return [
+            [ '/test?key=2',       'key',  1,                 ['3']],
+            [ '/test?key=all',     'key',  ['1', '2', '3'],   7],
+            [ '/test?key=2',       'key',  ['1', '2', '3'],   null],
+            [ '/test?key=2',       'key',  2,                 '3'],
+            [ '/test?key=2',       'key',  [2],               3],
+            [ '/test?key=2',       'key',  null,              ['3', 4]],
         ];
-
-        $provider = array();
-
-        foreach ($test as $testItem) {
-
-            $r = new Request();
-
-            $r->replace([$testItem['key'] => $testItem['value']]);
-
-            $provider[] = [$r, $testItem['key'], $testItem['all'], $testItem['default']];
-
-        }
-
-        return $provider;
     }
 
     public function keyAsArrayReturnDefaultProvider()
     {
-        $test = [
-            ['all' => [1], 'default' => ['3'], 'expected' => ['3']],
-            ['all' => ['1', '2', true], 'default' => [[1,2]], 'expected' => [[1,2]]],
-            ['all' => ['1', '2', '3'], 'default' => [false], 'expected' => [false]],
-            ['all' => [[2, 5, 'test'], 'test', '3'], 'default' => [1, true], 'expected' => [1, true]],
+        return [
+            [[1], ['3'], ['3']],
+            [['1', '2', true], [[1,2]], [[1,2]]],
+            [['1', '2', '3'], [false], [false]],
+            [[[2, 5, 'test'], 'test', '3'], [1, true], [1, true]],
 
         ];
-
-        $provider = array();
-
-        foreach ($test as $testItem) {
-
-            $r = new Request();
-
-            $provider[] = [$r, $testItem['all'], $testItem['default'], $testItem['expected']];
-
-        }
-
-        return $provider;
     }
 
     /**
-     * @param $r
+     * @param $u
      * @param $k
      * @param $a
      * @param $d
@@ -383,116 +328,96 @@ class UnitTest extends TestCase
      *
      * @dataProvider keyAsArrayProvider
      */
-    public function testKeyAsArray($r, $k, $a, $d, $e)
+    public function testKeyAsArray($u, $k, $a, $d, $e)
     {
-        $this->assertEquals($this->gadget->keyAsArray($r, $k, $a, $d), $e);
+        $this->get($u);
+
+        $this->assertEquals(Gadget::keyAsArray($k, $a, $d), $e);
     }
 
     /**
-     * @param $r
+     * @param $u
      * @param $k
      * @param $a
      * @param $d
      *
      * @dataProvider keyAsArrayExceptionProvider
      */
-    public function testKeyAsArrayException($r, $k, $a, $d)
+    public function testKeyAsArrayException($u, $k, $a, $d)
     {
+
+        $this->get($u);
 
         $this->expectException(\TypeError::class);
 
-        $this->gadget->keyAsArray($r, $k, $a, $d);
+        Gadget::keyAsArray($k, $a, $d);
 
     }
 
     /**
-     * @param $r
      * @param $a
      * @param $d
      * @param $e
      *
      * @dataProvider keyAsArrayReturnDefaultProvider
      */
-    public function testKeyAsArrayReturnDefault($r, $a, $d, $e)
+    public function testKeyAsArrayReturnDefault($a, $d, $e)
     {
-        $this->assertEquals($this->gadget->keyAsArray($r, 'key', $a, $d), $e);
+        $this->get('/test');
+
+        $this->assertEquals(Gadget::keyAsArray('key', $a, $d), $e);
     }
 
     public function withProvider()
     {
-        $test = [
-            [ 'key' => 'with', 'value' => 'all', 'all' => ['likes', 'posts', 'followers', 'following'], 'default' => ['likes'], 'expected' => ['likes', 'posts', 'followers', 'following']],
-            [ 'key' => 'with', 'value' => 'likes|following', 'all' => ['likes', 'posts', 'followers', 'following'], 'default' => ['likes'], 'expected' => ['likes', 'following']],
-            [ 'key' => 'with', 'value' => '', 'all' => ['likes', 'posts', 'followers', 'following'], 'default' => ['likes'], 'expected' => ['likes']],
-            [ 'key' => 'with', 'value' => null, 'all' => ['likes', 'posts', 'followers', 'following'], 'default' => ['likes'], 'expected' => ['likes']],
-            [ 'key' => 'with', 'value' => 'posts', 'all' => ['likes', 'posts', 'followers', 'following'], 'default' => ['following'], 'expected' => ['posts']],
+        return [
+            [ '/test?with=all', ['likes', 'posts', 'followers', 'following'], ['likes'], ['likes', 'posts', 'followers', 'following']],
+            [ '/test?with=likes|following', ['likes', 'posts', 'followers', 'following'], ['likes'], ['likes', 'following']],
+            [ '/test?with=', ['likes', 'posts', 'followers', 'following'], ['likes'], ['likes']],
+            [ '/test?with=posts', ['likes', 'posts', 'followers', 'following'], ['following'], ['posts']],
+            [ '/test?relations=posts', ['likes', 'posts', 'followers', 'following'], ['following'], ['following']],
         ];
-
-        $provider = array();
-
-        foreach ($test as $testItem) {
-
-            $r = new Request();
-
-            $r->replace([$testItem['key'] => $testItem['value']]);
-
-            $provider[] = [$r, $testItem['key'], $testItem['all'], $testItem['default'], $testItem['expected']];
-
-        }
-
-        return $provider;
     }
 
     /**
-     * @param $r
-     * @param $k
+     * @param $u
      * @param $a
      * @param $d
      * @param $e
      *
      * @dataProvider withProvider
      */
-    public function testWithProvider($r, $k, $a, $d, $e)
+    public function testWithProvider($u, $a, $d, $e)
     {
-        $this->assertEquals($this->gadget->with($r, $a, $d), $e);
+        $this->get($u);
+
+        $this->assertEquals(Gadget::with($a, $d), $e);
     }
 
     public function withExceptionProvider()
     {
-        $test = [
-            [ 'key' => 'with', 'value' => 'likes|following', 'all' => ['likes', 'posts', 'followers'], 'default' => ['likes']],
-            [ 'key' => 'with', 'value' => 'posts', 'all' => ['likes', 'followers', 'following'], 'default' => ['following']],
+        return [
+            [ '/test?with=likes|following', ['likes', 'posts', 'followers'], ['likes']],
+            [ '/test?with=posts', ['likes', 'followers', 'following'], ['following']],
         ];
 
-        $provider = array();
-
-        foreach ($test as $testItem) {
-
-            $r = new Request();
-
-            $r->replace([$testItem['key'] => $testItem['value']]);
-
-            $provider[] = [$r, $testItem['key'], $testItem['all'], $testItem['default']];
-
-        }
-
-        return $provider;
     }
 
     /**
-     * @param $r
-     * @param $k
+     * @param $u
      * @param $a
      * @param $d
      *
      * @dataProvider withExceptionProvider
      */
-    public function testWithException($r, $k, $a, $d)
+    public function testWithException($u, $a, $d)
     {
 
         $this->expectException(RelationNotExistingException::class);
 
-        $this->gadget->with($r, $a, $d);
+        $this->get($u);
+
+        Gadget::with($a, $d);
 
     }
 
@@ -544,7 +469,7 @@ class UnitTest extends TestCase
      */
     public function testBuildFilterItem($f, $e)
     {
-        $this->assertEquals($this->gadget->buildFilterItem($f), $e);
+        $this->assertEquals(Gadget::buildFilterItem($f), $e);
     }
 
     public function getFiltersProvider()
@@ -581,7 +506,8 @@ class UnitTest extends TestCase
      */
     public function testGetFilters($s, $e)
     {
-        $this->assertEquals($this->gadget->getFilters($s), $e);
+        $this->assertEquals(Gadget::getFilters($s), $e);
     }
+
 
 }

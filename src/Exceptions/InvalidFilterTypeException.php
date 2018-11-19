@@ -10,7 +10,7 @@ namespace Yaranliu\Gadget\Exceptions;
 
 use Exception;
 
-class UnknownFilterOperatorException extends Exception
+class InvalidFilterTypeException extends Exception
 {
     public function report()
     {
@@ -19,6 +19,6 @@ class UnknownFilterOperatorException extends Exception
 
     public function render($request)
     {
-        return response()->json(['error' => '422', 'message' => 'Unknown filter operator'], 422);
+        return response()->json(['error' => '500', 'message' => 'Invalid filter type in definition'], 500);
     }
 }

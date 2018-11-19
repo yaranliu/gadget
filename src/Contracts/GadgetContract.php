@@ -13,6 +13,8 @@ use Illuminate\Http\Request;
 
 interface GadgetContract
 {
+    public function configurationDefaults();
+
     public function emptyArray(array $arrayToClean, $string = true, $array = true);
 
     public function setBit($byte, $bit);
@@ -37,18 +39,16 @@ interface GadgetContract
 
     public function dotToArray($item, $array = array());
 
-    public function inputOrDefault(Request $request, $key, $default);
+    public function inputOrDefault($key, $default);
 
-    public function keyAsArray(Request $request, $key, array $allItems = array(), array $defaultItems = array());
+    public function keyAsArray($key, array $allItems = array(), array $defaultItems = array());
 
-    public function with(Request $request, array $allRelations = array(), array $defaultRelations = array());
+    public function with(array $allRelations = array(), array $defaultRelations = array());
 
     public function querySorted($query, $definition, $dir = 'asc', $sortable = [], $strict = false);
 
-    public function buildFilterItem($filter);
-
     public function getFilters($filterString);
 
-    public function searchFilterAndSort(Request $request, $query, $searchable, $sortable = []);
+    public function searchFilterAndSort($query, array $searchable, array $sortable = []);
 
 }
