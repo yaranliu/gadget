@@ -376,7 +376,7 @@ class Gadget implements GadgetContract
      * @param $filter
      * @return array|bool|null
      */
-    private function buildFilterItem($filter)
+    public function buildFilterItem($filter)
     {
         $sibling = Config::get('gadget.sign.sibling', '.');
         $lStart = Config::get('gadget.sign.list.start', '[');
@@ -721,5 +721,42 @@ class Gadget implements GadgetContract
 
         return $result;
 
+    }
+
+    /**
+     * A simplified and faster version of searchFilterAndSort
+     *
+     * This function is used to search in specific fields of a table with sorting hard coded. No filtering
+     * is possible and the nested search is not allowed. The result fields need to be defined as well.
+     *
+     * Use case:
+     * Auto-complete requests from the client app.
+     *
+     * @param $query
+     * @param $searchable
+     * @param $sortFields
+     * @return mixed
+     */
+    function lookupForSelection($query, $searchable, $sortFields)
+    {
+        $return = $query;
+
+        if (Request::has(Config::get('gadget.word.search', 'search'))) {
+            $search = Request::query(Config::get('gadget.word.search', 'search'));
+            if ($search != '') {
+                $searchItems = explode(Config::get('gadget.sign.delimiter.first', '|'), $search);
+                foreach ($searchItems as $searchItem) {
+                    $return = $return->where(function ($q) use ($searchItem, $searchable) {
+                        foreach ($searchable as $column) {
+                            $q->orWhere($column, 'like', '%' . $searchItem . '%');
+                        }
+                    });
+                }
+            }
+        }
+
+        foreach ($sortFields as $field => $dir) $return = $return->orderBy($field, $dir);
+
+        return $return;
     }
 }
