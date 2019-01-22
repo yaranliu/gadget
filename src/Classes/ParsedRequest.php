@@ -18,7 +18,7 @@ class ParsedRequest
 {
     protected $request;
 
-    protected $with;
+    public $with;
 
     /**
      * ParsedRequest constructor.
