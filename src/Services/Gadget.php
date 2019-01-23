@@ -737,7 +737,7 @@ class Gadget implements GadgetContract
      * @param $sortFields
      * @return mixed
      */
-    function lookupForSelection($query, $searchable, $sortFields)
+    public function lookupForSelection($query, $searchable, $sortFields)
     {
         $return = $query;
 
@@ -772,7 +772,7 @@ class Gadget implements GadgetContract
      * @param string $padString
      * @return string
      */
-    function autoReference($table, $forKey = "reference", $userDomainId = null, $domainKey = "domain_id", $padLength = 10, $padString = "0")
+    public function autoReference($table, $forKey = "reference", $userDomainId = null, $domainKey = "domain_id", $padLength = 10, $padString = "0")
     {
         $query = (is_null($userDomainId)) ? DB::table($table) : DB::table($table)->where($domainKey, $userDomainId);
         $r = $query->get()->count() + 1;

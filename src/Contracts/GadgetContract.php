@@ -51,4 +51,6 @@ interface GadgetContract
 
     public function searchFilterAndSort($query, array $searchable, array $sortable = []);
 
+    public function autoReference($table, $forKey = "reference", $userDomainId = null, $domainKey = "domain_id", $padLength = 10, $padString = "0");
+
 }
