@@ -759,4 +759,34 @@ class Gadget implements GadgetContract
 
         return $return;
     }
+
+    // DB Utils
+    // ----------------
+
+    /**
+     * @param $table
+     * @param string $forKey
+     * @param null $userDomainId
+     * @param string $domainKey
+     * @param int $padLength
+     * @param string $padString
+     * @return string
+     */
+    function autoReference($table, $forKey = "reference", $userDomainId = null, $domainKey = "domain_id", $padLength = 10, $padString = "0")
+    {
+        $query = (is_null($userDomainId)) ? DB::table($table) : DB::table($table)->where($domainKey, $userDomainId);
+        $r = $query->get()->count() + 1;
+        $ref = str_pad($r, $padLength, $padString, STR_PAD_LEFT);
+        $i = 1;
+        $existing = $query->where($forKey, $ref)->get();
+        while ($existing->count() > 0)
+        {
+            $ref = $ref."-".$i;
+            $existing = $query->where($forKey, $ref)->get();
+            $i++;
+        }
+
+        return $ref;
+    }
+
 }
