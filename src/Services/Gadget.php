@@ -764,6 +764,13 @@ class Gadget implements GadgetContract
     // ----------------
 
     /**
+     * Gets the number of records in a table belonging to a domain
+     * and generates a unique key by padding string to a specified length.
+     *
+     * Use case:
+     * Generating the product reference which is required by the database engine
+     * and supposed to be unique before actually storing the row into the table.
+     *
      * @param $table
      * @param string $forKey
      * @param null $userDomainId
@@ -787,6 +794,41 @@ class Gadget implements GadgetContract
         }
 
         return $ref;
+    }
+
+    // --------------------
+    // Validation utilities
+    // --------------------
+
+    /**
+     * Generates an array for validation with Model's $fillable attributes and
+     * sets them to 'sometimes' validation rule.
+     *
+     * $request->validate([]) filters out the non-listed attributes. This function is used to
+     * add the remaining attributes to the validation array.
+     *
+     * e.g.
+     * $data = $request->validate(addFillables(['name' => 'required'], Product::class));
+     *
+     * @param array $validate
+     * @param $class
+     * @param array $except
+     * @return array
+     */
+    public function addFillables(array $validate, $class, array $except = [])
+    {
+
+        $object = new $class();
+
+        $return = $validate;
+
+        $fillables = $object->getFillable();
+
+        foreach ($fillables as $fillable) {
+            if (!in_array($fillable, $except)) $return = array_add($return, $fillable, 'sometimes');
+        }
+
+        return $return;
     }
 
 }

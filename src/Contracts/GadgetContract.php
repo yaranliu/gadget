@@ -53,4 +53,6 @@ interface GadgetContract
 
     public function autoReference($table, $forKey = "reference", $userDomainId = null, $domainKey = "domain_id", $padLength = 10, $padString = "0");
 
+    public function addFillables(array $validate, $class, array $except = []);
+
 }
