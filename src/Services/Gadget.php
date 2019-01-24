@@ -208,6 +208,17 @@ class Gadget implements GadgetContract
     }
 
     /**
+     * @param $param
+     * @return bool
+     */
+    public function isFalse($param)
+    {
+        if (is_null($param)) return false;
+        if (is_bool($param)) return !$param;
+        else return in_array(lowercase($param), ['0', 'no', 'false', 'off', 0, 'hayır', 'yanlış']);
+    }
+
+    /**
      * Converts dotted string $item to an associative array or appends to the provided $array
      *
      * $array = dotToArray('tags.name');
@@ -829,6 +840,32 @@ class Gadget implements GadgetContract
         }
 
         return $return;
+    }
+
+    //---------------------
+    // Pagination Utilities
+    //---------------------
+
+    /**
+     * Looks for and returns per_page parameter in the request,
+     * otherwise returns per_page value in the \config\api.php configuration file
+     *
+     * @return mixed
+     */
+    public function  calc_per_page()
+    {
+        return $this->inputOrDefault(API_WORD_PER_PAGE, API_PER_PAGE);
+    }
+
+    /**
+     * @param $query
+     * @param $perPage
+     * @return mixed
+     */
+    public function getPaginated($query, $perPage)
+    {
+        if ($perPage == 0) return $query->get();
+        else return $query->paginate($perPage);
     }
 
 }

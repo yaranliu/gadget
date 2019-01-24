@@ -37,6 +37,8 @@ interface GadgetContract
 
     public function isTrue($param);
 
+    public function isFalse($param);
+
     public function dotToArray($item, $array = array());
 
     public function inputOrDefault($key, $default);
@@ -54,5 +56,9 @@ interface GadgetContract
     public function autoReference($table, $forKey = "reference", $userDomainId = null, $domainKey = "domain_id", $padLength = 10, $padString = "0");
 
     public function addFillables(array $validate, $class, array $except = []);
+
+    public function  calc_per_page();
+
+    public function getPaginated($query, $perPage);
 
 }
