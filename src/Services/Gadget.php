@@ -544,7 +544,7 @@ class Gadget implements GadgetContract
      *
      * ```$filterDefinitions``` is the array for the structure of the filter to be generated.
      *
-     * ```$preFilter``` is the array for pre-filtering the definitions, defaults to ```null```
+     * ```$preFilter``` is the array for pre-filtering the definitions, such as domain filtering, defaults to ```null```
      *
      * ```$limit``` is the max number of values to be retrieved as filter item, defaults to ```20```
      *

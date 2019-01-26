@@ -57,7 +57,7 @@ interface GadgetContract
 
     public function addFillables(array $validate, $class, array $except = []);
 
-    public function  calc_per_page();
+    public function calc_per_page();
 
     public function getPaginated($query, $perPage);
 
