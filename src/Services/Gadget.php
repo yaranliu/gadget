@@ -7,6 +7,7 @@ namespace Yaranliu\Gadget\Services;
 
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
 use Yaranliu\Gadget\Contracts\GadgetContract;
 use Yaranliu\Gadget\Exceptions\InvalidFilterStringException;
@@ -556,14 +557,15 @@ class Gadget implements GadgetContract
      *          'field'     => 'account_type_id',
      *          'label'     => 'Account type',
      *          'type'      => 'text',
-     *          'lookup'    => 'table:account_types,id,name,icon,color', // or table:categories,id,name
+     *          'values'    => 'table:account_types,id,name,icon,color', // or table:categories,id,name
      *      ],
      *      [
      *          'field'     => 'category',
      *          'label'     => 'Category',
      *          'type'      => 'text',
-     *          'lookup'    => 'values', // or table:brands,id,label
+     *          'values'    => 'lookup', // or table:brands,id,label
      *      ]
+     *
      *  ];
      *
      * ```
@@ -656,6 +658,9 @@ class Gadget implements GadgetContract
                             foreach ($preFilter as $key => $value) $query = $query->where($key, $value);
                             $query = $query->select($definition['field'])->distinct()->orderBy($definition['field'])->limit($limit)->get()->all();
                         }
+                        Log::info('Test Log');
+                        Log::info('---------------------------------');
+                        Log::info(dd($query));
                         $query = array_pluck($query, $definition['field']);
                     }
                     $valueDefinitionItems = array();
