@@ -865,7 +865,8 @@ class Gadget implements GadgetContract
      */
     public function  calc_per_page()
     {
-        return $this->inputOrDefault(API_WORD_PER_PAGE, API_PER_PAGE);
+        return $this->inputOrDefault(Config::get('gadget.word.per_page', 20),
+            20);
     }
 
     /**
