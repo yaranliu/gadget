@@ -556,14 +556,20 @@ class Gadget implements GadgetContract
      *      [
      *          'field'     => 'account_type_id',
      *          'label'     => 'Account type',
-     *          'type'      => 'text',
-     *          'values'    => 'table:account_types,id,name,icon,color', // or table:categories,id,name
+     *          'type'      => 'string',
+     *          'values'    => 'lookup:account_types,id,name,icon,color',
      *      ],
      *      [
      *          'field'     => 'category',
      *          'label'     => 'Category',
-     *          'type'      => 'text',
-     *          'values'    => 'lookup', // or table:brands,id,label
+     *          'type'      => 'string',
+     *          'values'    => 'table',
+     *      ],
+     *      [
+     *          'field'     => 'color',
+     *          'label'     => 'Color',
+     *          'type'      => 'string',
+     *          'values'    => 'list:Red,Orange,Blue',
      *      ]
      *
      *  ];
@@ -580,23 +586,25 @@ class Gadget implements GadgetContract
      *
      * ```type```
      *
-     * data type to be used while evaluating the filter value. *Options* are <text>, <boolean> and <numeric>
-     *
-     * ```lookup```
-     *
-     * required if ```type``` is ```text```
-     *
-     * ####Structure of the ```lookup``` entry in ````filterDefinitions``` parameter array
+     * data type to be used while evaluating the filter value. *Options* are <string>, <boolean> and <number>
      *
      * ```values```
      *
+     * required if ```type``` is ```string```
+     *
+     * ####Structure of the ```values``` entry in ````filterDefinitions``` parameter array
+     *
+     * ```table```
+     *
      * All the distinct values of ```field``` in the ```$baseTable``` will be retrieved and returned.
      *
-     *```table:table,linked-field,display-field```
+     *```lookup:table,linked-field,display-field```
      *
      * The return values for the filter options will be retrieved from a lookup table, e.g. definitions.
      * Two additional fields can be indicated to point the icon and color of the lookup field if exist in the underlying table
-     * ```<icon>``` and ```<color>```. See example above.
+     * ```<icon>``` and ```<color>```. See example  above.
+     *
+     * ```list:value 1,label 1|value 2,label 2|value 3,label 3```
      *
      * ####Structure of the ```$preFilter``` array
      *
@@ -658,9 +666,7 @@ class Gadget implements GadgetContract
                             foreach ($preFilter as $key => $value) $query = $query->where($key, $value);
                             $query = $query->select($definition['field'])->distinct()->orderBy($definition['field'])->limit($limit)->get()->all();
                         }
-                        Log::info('Test Log');
-                        Log::info('---------------------------------');
-                        Log::info(dd($query));
+
                         $query = array_pluck($query, $definition['field']);
                     }
                     $valueDefinitionItems = array();
@@ -681,7 +687,7 @@ class Gadget implements GadgetContract
                             $data = DB::table($valueDefinitionItems[0])->whereIn($valueDefinitionItems[1], $array)
                                 ->orderBy($valueDefinitionItems[2])->get();
                             $values = [];
-                            $keys = array('value', 'label', 'color', 'icon');
+                            $keys = array('value', 'label', 'icon', 'color');
                             foreach ($data as $item) {
                                 $i = 0;
                                 $valueToAdd = array();
