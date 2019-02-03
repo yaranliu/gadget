@@ -72,39 +72,39 @@ class Gadget implements GadgetContract
     }
 
     /**
-     * Sets nth bit ($bit) of $byte to 1
+     * Sets nth bit ($bit) of $word to 1
      *
-     * @param int $byte
-     * @param int $bit
-     * @return int
-     */
-    public function setBit($byte, $bit)
-    {
-        return ($byte | pow(2, $bit));
-    }
-
-    /**
-     * Sets nth bit ($bit) of the $byte to 0
-     *
-     * @param $byte
+     * @param $word
      * @param $bit
      * @return int
      */
-    public function resetBit($byte, $bit)
+    public function setBit($word, $bit)
     {
-        return ($byte & (255 - pow(2, $bit)));
+        return ($word | pow(2, $bit));
     }
 
     /**
-     * Returns nth bit ($bit) of the $byte as true (1) or false (0)
+     * Sets nth bit ($bit) of the $word to 0
      *
-     * @param $byte
+     * @param $word
+     * @param $bit
+     * @return int
+     */
+    public function resetBit($word, $bit)
+    {
+        return ($word & (65535 - pow(2, $bit)));
+    }
+
+    /**
+     * Returns nth bit ($bit) of the $word as true (1) or false (0)
+     *
+     * @param $word
      * @param $bit
      * @return bool
      */
-    public function checkBit($byte, $bit)
+    public function checkBit($word, $bit)
     {
-        return ($byte & pow(2, $bit)) == pow(2, $bit);
+        return ($word & pow(2, $bit)) == pow(2, $bit);
     }
 
     /**

@@ -17,11 +17,11 @@ interface GadgetContract
 
     public function emptyArray(array $arrayToClean, $string = true, $array = true);
 
-    public function setBit($byte, $bit);
+    public function setBit($word, $bit);
 
-    public function resetBit($byte, $bit);
+    public function resetBit($word, $bit);
 
-    public function checkBit($byte, $bit);
+    public function checkBit($word, $bit);
 
     public function cArray($input);
 

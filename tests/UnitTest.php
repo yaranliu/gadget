@@ -44,7 +44,8 @@ class UnitTest extends TestCase
         return array(
             array(162, 2, 166),
             array(178, 6, 242),
-            array(36, 2, 36)
+            array(36, 2, 36),
+            array(18803, 15, 51571 )
         );
     }
 
@@ -65,7 +66,8 @@ class UnitTest extends TestCase
         return array(
             array(70, 2, 66),
             array(209, 4, 193),
-            array(192, 5, 192)
+            array(192, 5, 192),
+            array(55667, 12, 51571)
         );
     }
 
@@ -87,6 +89,10 @@ class UnitTest extends TestCase
             array(193, 0, true),
             array(87, 6, true),
             array(87, 5, false),
+            array(45685, 11, false),
+            array(0xB275, 12, true),
+            array(0x6CCE, 13, true),
+
         );
     }
 
