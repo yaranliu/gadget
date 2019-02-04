@@ -1,11 +1,8 @@
 # Gadget
-A simple package for a few helper functions and GET request parser.
+A simple package for a few helper functions and GET request parser for Laravel framework
 
 ## Installation
-```
-composer require yaranliu/gadget
-```
-
+```composer require yaranliu/gadget```
 ## Available Methods
 
 ### Configuration
@@ -17,7 +14,7 @@ Returns package configuration
 Removes empty strings and/or arrays from a plain array
 
 #### Gadget::setBit($word, $bit)
-Sets nth bit ($bit) of $word to 1
+Sets nth bit (`$bit`) of `$word` to 1
 
 #### Gadget::resetBit($word, $bit)
 Sets nth bit ($bit) of the $word to 0
@@ -103,7 +100,7 @@ if HTTP Request has a parameter e.g. 'with',  decides which relations are to be 
 If client sends an HTTP GET request ```?with=all``` all of the relations will be loaded.
 
 ```
-$with =  ####Gadget::loadRelations($request, 'with', $this->allRelations, $this->defaultRelations);
+$with = Gadget::loadRelations($request, 'with', $this->allRelations, $this->defaultRelations);
 $entities = Model::with($with)->all();
 ```
 
