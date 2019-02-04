@@ -14,13 +14,13 @@ Returns package configuration
 Removes empty strings and/or arrays from a plain array
 
 #### Gadget::setBit($word, $bit)
-Sets nth bit (`$bit`) of `$word` to 1
+Sets *nth* `$bit` of `$word` to 1
 
 #### Gadget::resetBit($word, $bit)
-Sets nth bit ($bit) of the $word to 0
+Sets *nth* `$bit` of `$word` to 0
 
 #### Gadget::checkBit($word, $bit)
-Returns nth bit ($bit) of the $word as true (1) or false (0)
+Returns *nth* `$bit` of the `$word` as `true` i.e. `1` or `false` i.e. `0`
  
 #### Gadget::cArray($input) 
 If $input is an array, returns $input.
