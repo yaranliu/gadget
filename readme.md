@@ -1,3 +1,4 @@
+#Gadget
 A simple package for a few helper functions and GET request parser.
 
 ##Installation
