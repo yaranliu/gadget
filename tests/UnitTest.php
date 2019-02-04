@@ -130,6 +130,15 @@ class UnitTest extends TestCase
         $this->assertEquals(Gadget::cArray($a), $b);
     }
 
+    public function testReduceSpaces()
+    {
+        $this->assertEquals(Gadget::reduceSpaces("asd asd     asd  asd       asd"), "asd asd asd asd asd");
+        $this->assertEquals(Gadget::reduceSpaces("       asd  asd       asd", false), " asd asd asd");
+        $this->assertEquals(Gadget::reduceSpaces("    KĞŞ  öçı       ğüi     ", false), " KĞŞ öçı ğüi ");
+        $this->assertEquals(Gadget::reduceSpaces("       asd  asd       asd"), "asd asd asd");
+        $this->assertEquals(Gadget::reduceSpaces("    KĞŞ  öçı       ğüi     "), "KĞŞ öçı ğüi");
+    }
+
     public function lowercaseProvider()
     {
         return array(
@@ -174,6 +183,32 @@ class UnitTest extends TestCase
         $this->assertEquals(Gadget::uppercase($a, $c), $b);
     }
 
+
+    public function tr_UCFirstProvider()
+    {
+        return array(
+            array("michael jackson", false, false, "Michael Jackson"),
+            array("özge şenkal çavuşoğlu", false, false, "Özge Şenkal Çavuşoğlu"),
+            array("ahmet  şevket     .üreğir", false, false, "Ahmet  Şevket     .üreğir"),
+            array("ahmet  şevket     .üreğir", true, false, "Ahmet Şevket .üreğir"),
+            array("   AHMET     ŞENTÜRK    ", true, false, " Ahmet Şentürk "),
+            array("    AHMET     ŞENTÜRK      ", true, true, "Ahmet Şentürk"),
+        );
+    }
+
+    /**
+     * @param $a
+     * @param $b
+     * @param $c
+     * @param $d
+     *
+     * @dataProvider tr_UCFirstProvider
+     */
+    public function testTr_UCFirst($a, $b, $c, $d)
+    {
+        $this->assertEquals(Gadget::tr_ucfirst($a, $b, $c), $d);
+    }
+
     public function isTrueAsTrueProvider()
     {
         return array(
@@ -192,6 +227,8 @@ class UnitTest extends TestCase
             array('1', array(), true, 'en'),
         );
     }
+
+
 
     /**
      * @param $a

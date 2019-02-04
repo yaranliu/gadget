@@ -13,7 +13,9 @@
     "homepage": "https://github.com/yaranliu/gadget",
     "keywords": ["Laravel", "Gadget", "Utility"],
     "minimum-stability": "dev",
-    "require": {},
+    "require": {
+        "ext-mbstring": "^7.1"
+    },
     "require-dev": {
         "phpunit/phpunit": "^7.5@dev",
         "orchestra/testbench": "^3.8@dev",

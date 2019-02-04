@@ -137,6 +137,20 @@ class Gadget implements GadgetContract
     }
 
     /**
+     * Removes extra spaces in the text and leaves only one space between the words,
+     * optionally trims the $text
+     *
+     * @param $text
+     * @param bool $trim = true
+     * @return false|string
+     */
+    public function reduceSpaces($text, $trim = true)
+    {
+        $untrimmed = mb_ereg_replace(" +", " ", $text);
+        return ($trim) ? trim($untrimmed) : $untrimmed;
+    }
+
+    /**
      * Converts $text to lowercase using Turkish character set and multi byte conversion
      *
      * @param $text
@@ -156,6 +170,30 @@ class Gadget implements GadgetContract
     public function tr_strtoupper($text)
     {
         return mb_strtoupper(str_replace('i', 'İ', $text), 'UTF-8');
+    }
+
+    /**
+     * Converts $text to lowercase and capitalizes each word's first letter,
+     * optionally removing extra spaces between words and $trims the $text.
+     *
+     * @param $text
+     * @param bool $reduceSpaces = true
+     * @param bool $trim = true
+     * @return string
+     */
+    public function tr_ucfirst($text, $reduceSpaces = true, $trim = true)
+    {
+        $text = ($reduceSpaces) ? $this->tr_strtolower($this->reduceSpaces($text, false)) : $this->tr_strtolower($text);
+        $text = ($trim) ? trim($text) : $text;
+        $words = explode(" ", $text);
+        $converted = array();
+        foreach ($words as $word) {
+            $word = $this->tr_strtolower($word);
+            $word = mb_ereg_replace("^",$this->tr_strtoupper(mb_substr($word, 0, 1)), mb_substr($word, 1, mb_strlen($word) - 1));
+//            $word = substr_replace($word, $this->tr_strtoupper($word[0]), 0);
+            $converted[] = $word;
+        }
+        return implode(" ", $converted);
     }
 
     /**

@@ -27,9 +27,13 @@ interface GadgetContract
 
     public function removeFromArray($item, array $array);
 
+    public function reduceSpaces($text);
+
     public function tr_strtolower($text);
 
     public function tr_strtoupper($text);
+
+    public function tr_ucfirst($text, $reduceSpaces = true);
 
     public function lowercase($text);
 
