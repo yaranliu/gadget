@@ -10,51 +10,51 @@ composer require yaranliu/gadget
 
 ### Configuration
 
-####Gadget::configurationDefaults()
+#### Gadget::configurationDefaults()
 Returns package configuration
 
-####Gadget::emptyArray(array $arrayToClean, $string = true, $array = true)
+#### Gadget::emptyArray(array $arrayToClean, $string = true, $array = true)
 Removes empty strings and/or arrays from a plain array
 
-####Gadget::setBit($word, $bit)
+#### Gadget::setBit($word, $bit)
 Sets nth bit ($bit) of $word to 1
 
-####Gadget::resetBit($word, $bit)
+#### Gadget::resetBit($word, $bit)
 Sets nth bit ($bit) of the $word to 0
 
-####Gadget::checkBit($word, $bit)
+#### Gadget::checkBit($word, $bit)
 Returns nth bit ($bit) of the $word as true (1) or false (0)
  
-####Gadget::cArray($input) 
+#### Gadget::cArray($input) 
 If $input is an array, returns $input.
 If $input is a string, returns array of exploding the string with the delimiter defined in configuration file
 
-####Gadget::removeFromArray($item, array $array)
+#### Gadget::removeFromArray($item, array $array)
 Removes a $item from $array and returns the $array
 
-####Gadget::reduceSpaces($text, $trim = true)
+#### Gadget::reduceSpaces($text, $trim = true)
 Removes extra spaces in the text and leaves only one space between the words,
 optionally trims the $text
 
-####Gadget::tr_strtolower($text)
+#### Gadget::tr_strtolower($text)
 Converts $text to lowercase using Turkish character set and multi byte conversion
 
-####Gadget::tr_strtoupper($text)
+#### Gadget::tr_strtoupper($text)
 Converts $text to uppercase using Turkish character set and multi byte conversion
 
-####Gadget::tr_ucfirst($text, $reduceSpaces = true, $trim = true)
+#### Gadget::tr_ucfirst($text, $reduceSpaces = true, $trim = true)
 Converts $text to lowercase and capitalizes each word's first letter,
 optionally removing extra spaces between words and $trims the $text.
 
-####Gadget::lowercase($text, $locale = 'tr')
+#### Gadget::lowercase($text, $locale = 'tr')
 Converts $text to lowercase depending on $locale (default is 'tr')
 tr_strtolower is used if $locale is 'tr';  otherwise, mb_strtolower is used
 
-####Gadget::uppercase($text, $locale = 'tr')
+#### Gadget::uppercase($text, $locale = 'tr')
 Converts $text to uppercase depending on $locale (default is 'tr').
 tr_strtoupper is used if $locale is 'tr';  otherwise, mb_strtoupper is used
 
-####Gadget::isTrue($param, $base = array(), $default = true, $locale = 'tr')
+#### Gadget::isTrue($param, $base = array(), $default = true, $locale = 'tr')
 Interprets $input as boolean true or false.
 Checks if $input is an item of the following:
 '1', 'yes', 'true', 'on', 1, 'evet', 'doğru'
@@ -64,10 +64,10 @@ Providing $default as false will use only $base for interpretation
 
 $locale is used for case-insensitive check and defaults to 'tr' (Turkish)
 
-####Gadget::isFalse($param)
+#### Gadget::isFalse($param)
 
 
-####Gadget::dotToArray($item, $array = array())
+#### Gadget::dotToArray($item, $array = array())
 Converts dotted string $item to an associative array or appends to the provided $array
 
 ```
@@ -80,20 +80,17 @@ $array = dotToArray('pictures.title', $array);
 $array = ['tags' => ['name', 'color'],  'picture' => ['name', 'title']]
 ```
 
-####Gadget::inputOrDefault($key, $default)
+#### Gadget::inputOrDefault($key, $default)
 Returns the request parameter's value or the default value
 
-####Gadget::keyAsArray($key, array $allItems = array(), array $defaultItems = array())
+#### Gadget::keyAsArray($key, array $allItems = array(), array $defaultItems = array())
 Explodes the request parameter ($key) into an array and returns this array.
 If the $key does not exist on the request then the $defaultItems (array) is returned.
 If $key is 'all', $allItems is returned.
 
 If there is an item in the request param array which is NOT an element of the $allItems array, FALSE is returned
 
- 
-
-
-####Gadget::with(array $allRelations = array(), array $defaultRelations = array())
+#### Gadget::with(array $allRelations = array(), array $defaultRelations = array())
 Utilizes keyAsArray function to obtain which relations to be loaded by the request.
 
  ```RelationNotExistingException``` is  thrown if there is an item in the request param array
@@ -112,9 +109,7 @@ $entities = Model::with($with)->all();
 
 Please note that ```allRelations``` and ```defaultRelations``` properties must be declared as array on the Model class
  
-
-
-####Gadget::querySorted($query, $definition, $dir = 'asc', $sortable = [], $strict = false)
+#### Gadget::querySorted($query, $definition, $dir = 'asc', $sortable = [], $strict = false)
 Adds sorting to and returns provided $query.
 *Example for $sortable argument:*
 ```
@@ -135,16 +130,13 @@ $strict needs to be set to true if you want to limit sorting only to $sortable a
 setting any $field definition in the $sortable array to false has no effect, e.g. 'job_title' in the above example,
 just delete this definition. But if $strict is false, all fields but job_title will be appended to orderBy clause.
  
-
-
-####Gadget::buildFilterItem($filter)
+#### Gadget::buildFilterItem($filter)
 Internal method for building filters
 
-
-####Gadget::getFilters($filterString)
+#### Gadget::getFilters($filterString)
 Request parser for building filters
 
-####Gadget::searchFilterAndSort($query, array $searchable, array $sortable = [])
+#### Gadget::searchFilterAndSort($query, array $searchable, array $sortable = [])
 General search filter and sort utility
 
 The incoming request is analyzed and terms for search, filter and sort are processed
@@ -153,8 +145,7 @@ on the $query. The $query is built with where clauses and orderBy methods and re
 *Use case:*
 General GET requests for lists (searchable, filtered and sorted) e.g. products
 
-
-####Gadget::getFilterDefinitions($baseTable, array $filterDefinitions, $preFilter = array(), $limit = 20)
+#### Gadget::getFilterDefinitions($baseTable, array $filterDefinitions, $preFilter = array(), $limit = 20)
 Gets the filter definitions for the base table to be filtered
 ```$baseTable``` is the source from where the filter definitions will be resolved.
 ```$filterDefinitions``` is the array for the structure of the filter to be generated.
@@ -234,8 +225,7 @@ the lookup definitions need to be filtered before any option sent to the client.
 So, providing ```['company_id' => <Authenticated user's company id>]``` will show only the filter definitions of the products owned by
 the authenticated user's company. 
 
-
-####Gadget::lookupForSelection($query, $searchable, $sortFields)
+#### Gadget::lookupForSelection($query, $searchable, $sortFields)
 A simplified and faster version of searchFilterAndSort
 
 This function is used to search in specific fields of a table with sorting hard coded. No filtering
@@ -247,9 +237,7 @@ Auto-complete requests from the client app.
 
 *DB Utils*
 
-
-
-####Gadget::autoReference($table, $forKey = "reference", $userDomainId = null, $domainKey = "domain_id", $padLength = 10, $padString = "0")
+#### Gadget::autoReference($table, $forKey = "reference", $userDomainId = null, $domainKey = "domain_id", $padLength = 10, $padString = "0")
 Gets the number of records in a table belonging to a domain
 and generates a unique key by padding string to a specified length.
 
@@ -259,7 +247,7 @@ and supposed to be unique before actually storing the row into the table.
 
 *Validation utilities*
 
-####Gadget::addFillables(array $validate, $class, array $except = [])
+#### Gadget::addFillables(array $validate, $class, array $except = [])
 Generates an array for validation with Model's ```$fillable``` attributes and
 sets them to 'sometimes' validation rule.
 ```$request->validate([])``` filters out the non-listed attributes. This function is used to
@@ -270,10 +258,8 @@ e.g.
 
 *Pagination Utilities*
 
-####Gadget:: calc_per_page()
+#### Gadget:: calc_per_page()
 Looks for and returns per_page parameter in the request,
 otherwise returns per_page value in the \config\api.php configuration file
 
-####Gadget::getPaginated($query, $perPage)
-
-
+#### Gadget::getPaginated($query, $perPage)
