@@ -1,14 +1,14 @@
-#Gadget
+# Gadget
 A simple package for a few helper functions and GET request parser.
 
-##Installation
+## Installation
 ```
 composer require yaranliu/gadget
 ```
 
-##Available Methods
+## Available Methods
 
-###Configuration
+### Configuration
 
 ####Gadget::configurationDefaults()
 Returns package configuration
