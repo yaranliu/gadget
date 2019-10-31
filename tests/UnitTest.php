@@ -175,7 +175,7 @@ class UnitTest extends TestCase
      * @param $a
      * @param $b
      * @param $c
-     *
+     * d
      * @dataProvider uppercaseProvider
      */
     public function testUppercase($a, $b, $c)

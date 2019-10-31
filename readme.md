@@ -13,6 +13,9 @@ Returns package configuration
 #### Gadget::emptyArray(array $arrayToClean, $string = true, $array = true)
 Removes empty strings and/or arrays from a plain array
 
+#### Gadget::aggregateArray(array $input, $key)
+Groups the array by `$key` and aggregates (add or multiply) numerical values  
+
 #### Gadget::setBit($word, $bit)
 Sets *nth* `$bit` of `$word` to 1
 
@@ -81,8 +84,8 @@ $array = ['tags' => ['name', 'color'],  'picture' => ['name', 'title']]
 Returns the request parameter's value or the default value
 
 #### Gadget::keyAsArray($key, array $allItems = array(), array $defaultItems = array())
-Explodes the request parameter ($key) into an array and returns this array.
-If the $key does not exist on the request then the $defaultItems (array) is returned.
+Explodes the request parameter `$key` into an array and returns this array.
+If the `$key` does not exist on the request then the `$defaultItems` (array) is returned.
 If $key is 'all', $allItems is returned.
 
 If there is an item in the request param array which is NOT an element of the $allItems array, FALSE is returned

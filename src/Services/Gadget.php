@@ -5,6 +5,7 @@
  */
 namespace Yaranliu\Gadget\Services;
 
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -69,6 +70,43 @@ class Gadget implements GadgetContract
             if ($add) $a[] = $item;
         }
         return $a;
+    }
+
+    /**
+     * @param array $input
+     * @param $key
+     * @param string $operator
+     * @return array
+     */
+    public function aggregateArray(Array $input, $key, $operator = '+')
+    {
+
+        $output = array();
+
+        foreach ($input as $i) {
+            if (empty($output)) $output[] = $i;
+            else {
+                $index = 0;
+                $found = false;
+                while (!$found && $index < sizeof($output)) {
+                    $found = ($output[$index][$key] == $i[$key]);
+                    $index++;
+                }
+                if ($found) {
+                    foreach (Arr::except($output[$index - 1], $key) as $k => $v) {
+                        switch ($operator) {
+                            case '*': $output[$index - 1][$k] = $output[$index - 1][$k] * $i[k];break;
+                            default: $output[$index - 1][$k] += $i[$k];break;
+                        }
+                        $output[$index - 1][$k] += $i[$k];
+                    }
+                } else {
+                    $output[] = $i;
+                }
+            }
+        }
+
+        return $output;
     }
 
     /**
