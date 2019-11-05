@@ -441,7 +441,7 @@ class Gadget implements GadgetContract
      */
     public function querySorted($query, $definition, $dir = 'asc', $sortable = [], $strict = false)
     {
-        if (!array_has($sortable, $definition))
+        if (!Arr::has($sortable, $definition))
         {
             return ($strict) ? $query : $query->orderBy($definition, $dir);
         }
@@ -743,7 +743,7 @@ class Gadget implements GadgetContract
                             $query = $query->select($definition['field'])->distinct()->orderBy($definition['field'])->limit($limit)->get()->all();
                         }
 
-                        $query = array_pluck($query, $definition['field']);
+                        $query = Arr::pluck($query, $definition['field']);
                     }
                     $valueDefinitionItems = array();
                     if (in_array($valueDefinitions[0], ['list', 'lookup'])) {
@@ -769,7 +769,7 @@ class Gadget implements GadgetContract
                                 $valueToAdd = array();
                                 while ($i < count($valueDefinitionItems) - 1)
                                 {
-                                    $valueToAdd = array_add($valueToAdd, $keys[$i], $item->{$valueDefinitionItems[$i + 1]});
+                                    $valueToAdd = Arr::add($valueToAdd, $keys[$i], $item->{$valueDefinitionItems[$i + 1]});
                                     $i++;
                                 }
 
@@ -923,7 +923,7 @@ class Gadget implements GadgetContract
         $fillables = $object->getFillable();
 
         foreach ($fillables as $fillable) {
-            if (!in_array($fillable, $except)) $return = array_add($return, $fillable, 'sometimes');
+            if (!in_array($fillable, $except)) $return = Arr::add($return, $fillable, 'sometimes');
         }
 
         return $return;
